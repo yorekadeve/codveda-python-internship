@@ -16,6 +16,8 @@ codveda-python-internship/
 │   ├── Calculator.py        Task 1: Simple Calculator
 │   ├── word_counter.py      Task 3: Word Counter
 │   └── sample.txt           Sample text file for the Word Counter
+├── Level_2_Intermediate/        Level 2 (Intermediate)
+│   └── data_scraper.py          Task 2: Data Scraper
 └── README.md
 ```
 
@@ -88,3 +90,44 @@ The file contains 13 word(s).
 
 - Python 3
 - No extra packages need to be installed.
+
+---
+
+## Level 2 (Intermediate)
+
+### Task 2: Data Scraper (`Level_2_Intermediate/data_scraper.py`)
+
+**What it does:** downloads the first page of [books.toscrape.com](https://books.toscrape.com/), a practice website built for learning web scraping, extracts the title and price of each of the 20 books, and saves them to a CSV file.
+
+**How I built it:**
+- `requests.get()` retrieves the page, with a timeout so the program never waits forever, and `raise_for_status()` raises an error if the site answers with a failure.
+- `BeautifulSoup` parses the HTML. Each book sits in an `article` tag with the class `product_pod`, so `find_all()` returns one item per book.
+- The title is read from the link's `title` attribute, because the visible text is cut short on long titles. The price is read from the `price_color` paragraph.
+- `csv.DictWriter` saves the results to `books.csv`, with a `title,price` header. The file uses `utf-8-sig` encoding so the `£` sign displays correctly in Excel.
+- A `try / except requests.exceptions.RequestException` handles download failures (no internet, timeout, bad status) with a clear message, and a check handles a page that loads with no books found.
+
+**How to run it:**
+```
+pip install requests beautifulsoup4
+python Level_2_Intermediate/data_scraper.py
+```
+The program creates `books.csv` in the `Level_2_Intermediate` folder each time it runs.
+
+**Example output:**
+```
+Scraped 20 books and saved them to books.csv
+```
+
+**Example rows in `books.csv`:**
+```
+title,price
+A Light in the Attic,£51.77
+Tipping the Velvet,£53.74
+```
+
+### What I learned in Level 2 so far
+
+- Sending HTTP requests with the `requests` library and handling network errors
+- Parsing HTML with BeautifulSoup and picking out data by tag and class
+- Writing structured data to a CSV file with Python's `csv` module
+- Scraping responsibly, by practising on a website designed for it
