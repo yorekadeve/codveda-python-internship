@@ -17,8 +17,8 @@ codveda-python-internship/
 │   ├── word_counter.py      Task 3: Word Counter
 │   └── sample.txt           Sample text file for the Word Counter
 ├── Level_2_Intermediate/        Level 2 (Intermediate)
-│   └── data_scraper.py          Task 2: Data Scraper
-└── README.md
+│   ├── data_scraper.py          Task 2: Data Scraper
+│   └── api_integration.py       Task 3: Password Breach Checker (API integration)
 ```
 
 Each level has its own folder, and each task is its own Python file.
@@ -125,9 +125,40 @@ A Light in the Attic,£51.77
 Tipping the Velvet,£53.74
 ```
 
-### What I learned in Level 2 so far
+### Task 3: API Integration, Password Breach Checker (`Level_2_Intermediate/api_integration.py`)
 
-- Sending HTTP requests with the `requests` library and handling network errors
+**What it does:** checks whether a password has appeared in known data breaches, using the free [Have I Been Pwned Pwned Passwords API](https://haveibeenpwned.com/API/v3#PwnedPasswords). It needs no API key.
+
+**Security design:** the password is typed with hidden input, hashed locally with SHA-1, and only the first 5 characters of the hash are sent to the API (a technique called k-anonymity). The API returns every hash that starts with those 5 characters, and the match is checked on my own computer, so the password itself is never sent.
+
+**How I built it:**
+- `getpass.getpass()` reads the password without showing it on screen, and `hashlib.sha1()` creates the hash.
+- `requests.get()` sends a GET request with only the 5-character prefix, with a timeout, and `raise_for_status()` raises an error on a failure response.
+- The response is plain text with one `SUFFIX:COUNT` line per hash. The program splits each line, compares the suffix with the rest of my hash, and reads the breach count.
+- The result is shown as a clear warning with the number of breaches, or a message that the password was not found.
+- A `try / except / else` block handles a timeout, no internet connection, a failure response from the server, and an unexpected response format.
+
+**How to run it:**
+```
+python Level_2_Intermediate/api_integration.py
+```
+Typing is hidden, so nothing appears as the password is entered. Use dummy passwords only, never real ones.
+
+**Example output (with a common password):**
+```
+=== Password Breach Checker ===
+Your password is never sent. Only the first 5 characters of its hash are.
+Enter a password to check (typing is hidden):
+WARNING: This password appeared 2,266,677 times in known data breaches. Do not use it.
+```
+
+### What I learned in Level 2
+
+- Sending HTTP requests with the `requests` library and handling network errors such as timeouts and lost connections
 - Parsing HTML with BeautifulSoup and picking out data by tag and class
 - Writing structured data to a CSV file with Python's `csv` module
 - Scraping responsibly, by practising on a website designed for it
+- Using a public API and parsing its text response
+- Applying security ideas in code: hashing, k-anonymity, and hidden password input
+
+---
