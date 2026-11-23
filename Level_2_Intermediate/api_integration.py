@@ -5,11 +5,11 @@ import requests
 
 API_URL = "https://api.pwnedpasswords.com/range/"
 
-
+#Password used for demonstartion: password123
 def hash_password(password):
     return hashlib.sha1(password.encode("utf-8")).hexdigest().upper()
 
-
+#Technique used here is - k-anonymity
 def fetch_hash_range(prefix):
     response = requests.get(API_URL + prefix, timeout=10)
     response.raise_for_status()
