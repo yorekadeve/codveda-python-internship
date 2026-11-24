@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="{% url 'my_reports' %}" class="small">&larr; Back to my reports</a>
+<div class="card shadow-sm mt-2">
+  <div class="card-body p-4">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+      <h2 class="h4 mb-0">{{ report.indicator_value }}</h2>
+      {% if report.status == "verified" %}
+        <span class="badge bg-success">Verified</span>
+      {% elif report.status == "rejected" %}
+        <span class="badge bg-secondary">Rejected</span>
+      {% else %}
+        <span class="badge bg-warning text-dark">Pending review</span>
+      {% endif %}
+    </div>
+
+    <dl class="row mb-0">
+      <dt class="col-sm-4">Scam type</dt>
+      <dd class="col-sm-8">{{ report.get_scam_type_display }}</dd>
+      <dt class="col-sm-4">Reported as</dt>
+      <dd class="col-sm-8">{{ report.get_indicator_type_display }}</dd>
+      <dt class="col-sm-4">Date it happened</dt>
+      <dd class="col-sm-8">{{ report.date_occurred }}</dd>
+      <dt class="col-sm-4">Amount lost (UGX)</dt>
+      <dd class="col-sm-8">{{ report.amount_lost|default:"Not given" }}</dd>
+      <dt class="col-sm-4">What happened</dt>
+      <dd class="col-sm-8">{{ report.description|linebreaksbr }}</dd>
+      {% if report.message_text %}
+        <dt class="col-sm-4">Scam message</dt>
+        <dd class="col-sm-8">{{ report.message_text|linebreaksbr }}</dd>
+      {% endif %}
+      <dt class="col-sm-4">Submitted</dt>
+      <dd class="col-sm-8">{{ report.created_at }}</dd>
+      {% if report.status == "rejected" %}
+        <dt class="col-sm-4">Reason for rejection</dt>
+        <dd class="col-sm-8">{{ report.rejection_reason }}</dd>
+      {% endif %}
+    </dl>
+
+    {% if report.evidence %}
+      <hr>
+      <h3 class="h6">Your screenshot</h3>
+      <img src="{% url 'evidence_file' report.pk %}" class="img-fluid border rounded" alt="Screenshot you uploaded">
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
