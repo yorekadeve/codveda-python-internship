@@ -5,6 +5,9 @@ from django.http import FileResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
+from audit.throttle import rate_limit
+from audit.utils import log_event
+
 from .forms import ScamReportForm
 from .models import ScamReport
 from .utils import detect_indicator, lookup_values
@@ -12,6 +15,7 @@ from .utils import detect_indicator, lookup_values
 REVIEW_PERMISSION = "reports.review_reports"
 
 
+@rate_limit("search", 30, 60)
 def check_scam(request):
     query = request.GET.get("q", "").strip()[:255]
     context = {"query": query}
@@ -47,6 +51,7 @@ def check_scam(request):
 
 
 @login_required
+@rate_limit("submit_report", 10, 3600, methods=("POST",))
 def submit_report(request):
     if request.method == "POST":
         form = ScamReportForm(request.POST, request.FILES)
@@ -54,6 +59,7 @@ def submit_report(request):
             report = form.save(commit=False)
             report.reporter = request.user
             report.save()
+            log_event("report_submitted", request=request, target=f"report:{report.pk}")
             messages.success(
                 request,
                 "Thank you. Your report was submitted and is waiting for review.",
@@ -79,10 +85,13 @@ def report_detail(request, pk):
 @login_required
 def evidence_file(request, pk):
     report = get_object_or_404(ScamReport, pk=pk)
-    if report.reporter != request.user and not request.user.has_perm(REVIEW_PERMISSION):
+    is_owner = report.reporter == request.user
+    if not is_owner and not request.user.has_perm(REVIEW_PERMISSION):
         raise Http404
     if not report.evidence:
         raise Http404
+    if not is_owner:
+        log_event("evidence_viewed", request=request, target=f"report:{report.pk}")
     return FileResponse(report.evidence.open("rb"))
 
 
@@ -113,7 +122,9 @@ def moderation_queue(request):
 @login_required
 @permission_required(REVIEW_PERMISSION, raise_exception=True)
 def review_report(request, pk):
-    report = get_object_or_404(ScamReport.objects.select_related("reporter", "reviewed_by"), pk=pk)
+    report = get_object_or_404(
+        ScamReport.objects.select_related("reporter", "reviewed_by"), pk=pk
+    )
 
     if request.method == "POST":
         if report.reporter_id == request.user.id:
@@ -124,6 +135,7 @@ def review_report(request, pk):
         if action == "verify":
             report.status = ScamReport.Status.VERIFIED
             report.rejection_reason = ""
+            details = ""
         elif action == "reject":
             reason = request.POST.get("rejection_reason", "").strip()
             if not reason:
@@ -131,12 +143,19 @@ def review_report(request, pk):
                 return redirect("review_report", pk=pk)
             report.status = ScamReport.Status.REJECTED
             report.rejection_reason = reason[:500]
+            details = f"reason: {report.rejection_reason}"
         else:
             return HttpResponseBadRequest("Unknown action.")
 
         report.reviewed_by = request.user
         report.reviewed_at = timezone.now()
         report.save()
+        log_event(
+            f"report_{report.status}",
+            request=request,
+            target=f"report:{report.pk}",
+            details=details,
+        )
         messages.success(request, f"Report marked as {report.get_status_display().lower()}.")
         return redirect("moderation_queue")
 

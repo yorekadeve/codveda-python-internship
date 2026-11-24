@@ -1,28 +1,25 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
 
+from audit.throttle import rate_limit
+
 from . import views
 
 urlpatterns = [
     path("", views.home, name="home"),
     path("register/", views.register, name="register"),
-    path(
-        "login/",
-        auth_views.LoginView.as_view(
-            template_name="accounts/form.html",
-            extra_context={"title": "Log in", "button": "Log in", "is_login": True},
-        ),
-        name="login",
-    ),
+    path("login/", views.SecureLoginView.as_view(), name="login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path(
         "password-reset/",
-        auth_views.PasswordResetView.as_view(
-            template_name="accounts/form.html",
-            email_template_name="accounts/password_reset_email.txt",
-            subject_template_name="accounts/password_reset_subject.txt",
-            success_url=reverse_lazy("password_reset_done"),
-            extra_context={"title": "Reset your password", "button": "Send reset link"},
+        rate_limit("password_reset", 5, 3600, methods=("POST",))(
+            auth_views.PasswordResetView.as_view(
+                template_name="accounts/form.html",
+                email_template_name="accounts/password_reset_email.txt",
+                subject_template_name="accounts/password_reset_subject.txt",
+                success_url=reverse_lazy("password_reset_done"),
+                extra_context={"title": "Reset your password", "button": "Send reset link"},
+            )
         ),
         name="password_reset",
     ),
