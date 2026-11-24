@@ -19,6 +19,9 @@ codveda-python-internship/
 ├── Level_2_Intermediate/        Level 2 (Intermediate)
 │   ├── data_scraper.py          Task 2: Data Scraper
 │   └── api_integration.py       Task 3: Password Breach Checker (API integration)
+├── Level_3_Advanced/            Level 3 (Advanced)
+│   └── (Django project)         Task 1: ScamShield UG, Django web application
+└── README.md
 ```
 
 Each level has its own folder, and each task is its own Python file.
@@ -161,4 +164,56 @@ WARNING: This password appeared 2,266,677 times in known data breaches. Do not u
 - Using a public API and parsing its text response
 - Applying security ideas in code: hashing, k-anonymity, and hidden password input
 
+## Requirements
+
+- Python 3
+- Level 1 needs no extra packages.
+- Level 2 needs `requests` and `beautifulsoup4`:
+  pip install requests beautifulsoup4
+---
+
+## Level 3 (Advanced)
+
+### Task 1: Django Web Application with Authentication, ScamShield UG (`Level_3_Advanced/`)
+
+**What it does:** a community scam-reporting and checking portal for Uganda. Anyone can check a phone number or link before paying. Registered users report scams and confirm other users' reports. Moderators verify or reject reports. The public sees only verified results, and never the reporter, the description or the screenshot.
+
+**How I built it:**
+- **Authentication:** Django's built-in system handles registration, login, logout and password reset by email. Passwords are hashed, and reset links work once and expire after an hour.
+- **Roles:** visitors, registered users, moderators (a group holding a custom `review_reports` permission) and admins. Every protected page checks the role on the server.
+- **Database:** MySQL, through a database user limited to this project. Secrets are kept in a `.env` file that is never committed.
+- **Reports and checker:** phone numbers and links are normalised, so different spellings of the same number match. Screenshots are checked for size, extension and real image format, saved under random names, and served only to the owner and moderators.
+- **Security layer:** login lockout after 5 failed attempts, rate limits, a read-only audit log, CSRF and XSS protection, secure cookie and HTTPS settings, and separation of duties so moderators cannot approve their own reports.
+- **Statistics and confirmations:** a public statistics page built from verified reports, and a "I was also targeted by this" button that moderators see as a count in the queue.
+- **Tests:** 51 automated tests prove the security rules.
+
+**How to run it:**
+```
+cd Level_3_Advanced
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
+The database and the `.env` file must be set up first. The full steps are in [Level_3_Advanced/README.md](Level_3_Advanced/README.md). To run the tests:
+```
+python manage.py test --noinput
+```
+
+**Example result for a verified number:**
+```
+Verified scam
+This number or link has been reported and verified 2 times. Do not send money or share personal details.
+Checked as: +256772123456
+```
+
+### What I learned in Level 3
+
+- Building a complete Django application with models, views, forms, templates and URLs
+- Role-based access control with groups and permissions
+- Defending against common web attacks: IDOR, CSRF, XSS, SQL injection, brute-force login, unsafe file upload, and scraping
+- Keeping secrets out of code, and applying least privilege to the database
+- Writing automated tests that prove security rules keep working
+
+## Requirements
+- Level 3 needs MySQL 8 and the packages in `Level_3_Advanced/requirements.txt` (setup steps are in `Level_3_Advanced/README.md`).
 ---
