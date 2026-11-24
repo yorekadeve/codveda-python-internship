@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load humanize %}
 {% block content %}
 <div class="text-center py-5">
   <h1 class="display-5 fw-bold">Check before you pay.</h1>
@@ -16,4 +17,26 @@
     Seen a scam? <a href="{% url 'submit_report' %}">Report it</a> and help protect others.
   </p>
 </div>
+
+<div class="row g-3 text-center mb-4">
+  <div class="col-md-4">
+    <div class="card shadow-sm p-3">
+      <div class="stat-number">{{ verified_reports|intcomma }}</div>
+      <div class="text-muted">Verified scam reports</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm p-3">
+      <div class="stat-number">{{ flagged_count|intcomma }}</div>
+      <div class="text-muted">Numbers and links flagged</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm p-3">
+      <div class="stat-number">{{ total_lost|intcomma }}</div>
+      <div class="text-muted">UGX reported lost</div>
+    </div>
+  </div>
+</div>
+<p class="text-center small"><a href="{% url 'statistics' %}">See all statistics</a></p>
 {% endblock %}

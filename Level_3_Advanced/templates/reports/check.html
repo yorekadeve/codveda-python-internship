@@ -49,6 +49,29 @@
           </p>
         </div>
       {% endif %}
+
+      {% if confirmations %}
+        <p class="small text-muted">
+          {{ confirmations }} other user{{ confirmations|pluralize }}
+          confirmed being targeted by this too.
+        </p>
+      {% endif %}
+
+      {% if confirm_target %}
+        {% if user.is_authenticated %}
+          {% if can_confirm %}
+            <form method="post" action="{% url 'confirm_report' confirm_target.pk %}" class="mb-3">
+              {% csrf_token %}
+              <button class="btn btn-outline-danger btn-sm">I was also targeted by this</button>
+            </form>
+          {% elif already_confirmed %}
+            <p class="small text-success">You have confirmed this. Thank you.</p>
+          {% endif %}
+        {% else %}
+          <p class="small"><a href="{% url 'login' %}">Log in</a> to confirm that you were targeted too.</p>
+        {% endif %}
+      {% endif %}
+
       {% if normalized %}
         <p class="small text-muted">Checked as: {{ normalized }}</p>
       {% endif %}

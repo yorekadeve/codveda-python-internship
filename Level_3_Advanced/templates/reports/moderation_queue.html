@@ -24,7 +24,10 @@
 <div class="table-responsive">
   <table class="table table-hover bg-white shadow-sm">
     <thead>
-      <tr><th>Number or link</th><th>Type</th><th>Reporter</th><th>Submitted</th><th></th></tr>
+      <tr>
+        <th>Number or link</th><th>Type</th><th>Reporter</th>
+        <th>Confirmations</th><th>Submitted</th><th></th>
+      </tr>
     </thead>
     <tbody>
       {% for report in reports %}
@@ -32,6 +35,7 @@
         <td>{{ report.indicator_value }}</td>
         <td>{{ report.get_scam_type_display }}</td>
         <td>{{ report.reporter.username }}</td>
+        <td>{{ report.confirmations }}</td>
         <td>{{ report.created_at|date:"j M Y, H:i" }}</td>
         <td><a href="{% url 'review_report' report.pk %}">Review</a></td>
       </tr>

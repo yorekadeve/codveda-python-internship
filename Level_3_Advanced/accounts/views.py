@@ -7,6 +7,8 @@ from django.shortcuts import redirect, render
 from audit.throttle import rate_limit
 from audit.utils import get_client_ip, log_event
 
+from reports.stats import headline_stats
+
 from .forms import RegisterForm
 
 MAX_FAILED_LOGINS = 5
@@ -14,7 +16,7 @@ LOCKOUT_SECONDS = 15 * 60
 
 
 def home(request):
-    return render(request, "home.html")
+        return render(request, "home.html", headline_stats())
 
 
 @rate_limit("register", 5, 3600, methods=("POST",))

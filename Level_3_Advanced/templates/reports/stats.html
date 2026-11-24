@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Statistics - ScamShield UG{% endblock %}
+{% block content %}
+<h2 class="h4 mb-1">Scam statistics</h2>
+<p class="text-muted small">Based on verified reports only. Amounts are optional and reported by the victims.</p>
+
+<div class="row g-3 text-center mb-4">
+  <div class="col-md-4">
+    <div class="card shadow-sm p-3">
+      <div class="stat-number">{{ verified_reports|intcomma }}</div>
+      <div class="text-muted">Verified reports</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm p-3">
+      <div class="stat-number">{{ flagged_count|intcomma }}</div>
+      <div class="text-muted">Numbers and links flagged</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm p-3">
+      <div class="stat-number">{{ total_lost|intcomma }}</div>
+      <div class="text-muted">UGX reported lost</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h3 class="h6 mb-3">Scams by type</h3>
+        {% for row in by_type %}
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small">
+              <span>{{ row.label }}</span>
+              <span>{{ row.total }} ({{ row.percent }}%)</span>
+            </div>
+            <div class="progress" style="height: 8px;">
+              <div class="progress-bar bg-danger" style="width: {{ row.percent }}%"></div>
+            </div>
+          </div>
+        {% empty %}
+          <p class="small text-muted mb-0">No verified reports yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h3 class="h6 mb-3">Most reported (verified)</h3>
+        {% for row in top_indicators %}
+          <div class="d-flex justify-content-between border-bottom py-2">
+            <span>
+              <a href="{% url 'check_scam' %}?q={{ row.normalized_value|urlencode }}">{{ row.normalized_value }}</a>
+              <span class="badge bg-light text-dark border">
+                {% if row.indicator_type == "phone" %}Phone{% else %}Link{% endif %}
+              </span>
+            </span>
+            <span class="text-muted">{{ row.total }} report{{ row.total|pluralize }}</span>
+          </div>
+        {% empty %}
+          <p class="small text-muted mb-0">No verified reports yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h3 class="h6 mb-3">Verified incidents by month (last 6 months)</h3>
+        {% for month in months %}
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="small text-muted" style="width: 90px;">{{ month.month|date:"M Y" }}</span>
+            <div class="progress flex-grow-1" style="height: 14px;">
+              <div class="progress-bar bg-dark" style="width: {{ month.percent }}%"></div>
+            </div>
+            <span class="small" style="width: 30px;">{{ month.total }}</span>
+          </div>
+        {% empty %}
+          <p class="small text-muted mb-0">No verified incidents in the last six months.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

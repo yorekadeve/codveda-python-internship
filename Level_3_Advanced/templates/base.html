@@ -13,20 +13,24 @@
     }
     .helptext, form ul { font-size: .85rem; color: #6c757d; }
     form ul.errorlist { color: #dc3545; list-style: none; padding-left: 0; margin: .25rem 0 0; }
+    .brand-dot { color: #ffc107; }
+    .stat-number { font-size: 2rem; font-weight: 700; }
+    footer a { color: inherit; }
   </style>
 </head>
-<body class="bg-light">
+<body class="bg-light d-flex flex-column min-vh-100">
   <nav class="navbar navbar-expand navbar-dark bg-dark mb-4">
-    <div class="container">
-      <a class="navbar-brand" href="{% url 'home' %}">ScamShield UG</a>
-      <div class="d-flex align-items-center gap-2">
+    <div class="container flex-wrap gap-2">
+      <a class="navbar-brand" href="{% url 'home' %}">ScamShield <span class="brand-dot">UG</span></a>
+      <div class="d-flex flex-wrap align-items-center gap-2">
         <a class="btn btn-warning btn-sm" href="{% url 'check_scam' %}">Check a number</a>
+        <a class="btn btn-outline-light btn-sm" href="{% url 'statistics' %}">Statistics</a>
         {% if user.is_authenticated %}
           <a class="btn btn-danger btn-sm" href="{% url 'submit_report' %}">Report a scam</a>
           <a class="btn btn-outline-light btn-sm" href="{% url 'my_reports' %}">My reports</a>
-                    {% if perms.reports.review_reports %}
-                      <a class="btn btn-info btn-sm" href="{% url 'moderation_queue' %}">Moderation</a>
-                    {% endif %}
+          {% if perms.reports.review_reports %}
+            <a class="btn btn-info btn-sm" href="{% url 'moderation_queue' %}">Moderation</a>
+          {% endif %}
           <span class="text-light small">Hi, {{ user.username }}</span>
           <form method="post" action="{% url 'logout' %}" class="d-inline">
             {% csrf_token %}
@@ -34,17 +38,24 @@
           </form>
         {% else %}
           <a class="btn btn-outline-light btn-sm" href="{% url 'login' %}">Log in</a>
-          <a class="btn btn-warning btn-sm" href="{% url 'register' %}">Register</a>
+          <a class="btn btn-light btn-sm" href="{% url 'register' %}">Register</a>
         {% endif %}
       </div>
     </div>
   </nav>
 
-  <main class="container">
+  <main class="container flex-grow-1 mb-5">
     {% for message in messages %}
       <div class="alert alert-{{ message.tags }}">{{ message }}</div>
     {% endfor %}
     {% block content %}{% endblock %}
   </main>
+
+  <footer class="bg-dark text-light py-3 small">
+    <div class="container">
+      ScamShield UG is a community project. Reports are reviewed by moderators but are not legal
+      findings. If you have lost money, contact your mobile money provider and the police straight away.
+    </div>
+  </footer>
 </body>
 </html>

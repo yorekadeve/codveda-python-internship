@@ -69,3 +69,22 @@ class ScamReport(models.Model):
 
     def __str__(self):
         return f"{self.get_scam_type_display()}: {self.indicator_value} ({self.get_status_display()})"
+    
+class Corroboration(models.Model):
+    report = models.ForeignKey(
+        ScamReport, on_delete=models.CASCADE, related_name="corroborations" # type: ignore
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="corroborations"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["report", "user"], name="one_confirmation_per_user_per_report"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user} confirmed report {self.report_id}"
