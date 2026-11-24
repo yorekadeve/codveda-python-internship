@@ -2,8 +2,18 @@
 {% block content %}
 <div class="text-center py-5">
   <h1 class="display-5 fw-bold">Check before you pay.</h1>
-  <p class="lead text-muted">
+  <p class="lead text-muted mb-4">
     A community-powered database of reported scam numbers, links and messages in Uganda.
+  </p>
+  <form method="get" action="{% url 'check_scam' %}" class="mx-auto" style="max-width: 560px;">
+    <div class="d-flex gap-2">
+      <input type="text" name="q" maxlength="255"
+             placeholder="Enter a phone number or website link" required>
+      <button class="btn btn-dark">Check</button>
+    </div>
+  </form>
+  <p class="small text-muted mt-3">
+    Seen a scam? <a href="{% url 'submit_report' %}">Report it</a> and help protect others.
   </p>
 </div>
 {% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <h2 class="h4 mb-3">Check a phone number or website link</h2>
+
+    <form method="get" action="{% url 'check_scam' %}" class="mb-4">
+      <div class="d-flex gap-2">
+        <input type="text" name="q" value="{{ query }}" maxlength="255"
+               placeholder="e.g. 0772123456 or example.com/offer" required>
+        <button class="btn btn-dark">Check</button>
+      </div>
+    </form>
+
+    {% if query %}
+      {% if invalid %}
+        <div class="alert alert-warning">
+          That does not look like a phone number or a website link. Try something like
+          0772123456 or example.com.
+        </div>
+      {% elif verified_count %}
+        <div class="alert alert-danger">
+          <h3 class="h5">Verified scam</h3>
+          <p class="mb-2">
+            This number or link has been reported and verified {{ verified_count }}
+            time{{ verified_count|pluralize }}. Do not send money or share personal details.
+          </p>
+          <ul class="mb-2">
+            {% for row in type_breakdown %}
+              <li>{{ row.label }}: {{ row.total }}</li>
+            {% endfor %}
+          </ul>
+          <p class="small mb-0">Most recent incident: {{ last_reported }}</p>
+        </div>
+      {% elif pending_count %}
+        <div class="alert alert-warning">
+          <h3 class="h5">Reported, not yet verified</h3>
+          <p class="mb-0">
+            Someone has reported this, and moderators are still checking it. Be careful and
+            do not send money until you are sure.
+          </p>
+        </div>
+      {% else %}
+        <div class="alert alert-secondary">
+          <h3 class="h5">No reports found</h3>
+          <p class="mb-0">
+            Nobody has reported this yet. That does not mean it is safe, so always confirm
+            who you are dealing with before you pay.
+          </p>
+        </div>
+      {% endif %}
+      {% if normalized %}
+        <p class="small text-muted">Checked as: {{ normalized }}</p>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

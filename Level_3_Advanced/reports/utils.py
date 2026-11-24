@@ -41,3 +41,18 @@ def normalize_indicator(indicator_type, value):
     if indicator_type == "link":
         return normalize_link(value) or ""
     return value.strip().lower()
+
+def detect_indicator(query):
+    query = query.strip()
+    if not query:
+        return None, ""
+    if re.fullmatch(r"[\d\s+()\-]+", query):
+        return "phone", normalize_phone(query) or ""
+    return "link", normalize_link(query) or ""
+
+
+def lookup_values(indicator_type, normalized):
+    values = [normalized]
+    if indicator_type == "link" and "/" in normalized:
+        values.append(normalized.split("/", 1)[0])
+    return values
