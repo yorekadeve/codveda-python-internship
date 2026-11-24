@@ -88,3 +88,7 @@ LOGOUT_REDIRECT_URL = "home"
 PASSWORD_RESET_TIMEOUT = 3600
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+from django.contrib.messages import constants as message_constants
+
+MESSAGE_TAGS = {message_constants.ERROR: "danger"}

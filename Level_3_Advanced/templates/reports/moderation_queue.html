@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="h4 mb-3">Moderation</h2>
+
+<ul class="nav nav-pills mb-3">
+  <li class="nav-item">
+    <a class="nav-link {% if current == 'pending' %}active{% endif %}" href="?status=pending">
+      Pending ({{ counts.pending }})
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if current == 'verified' %}active{% endif %}" href="?status=verified">
+      Verified ({{ counts.verified }})
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if current == 'rejected' %}active{% endif %}" href="?status=rejected">
+      Rejected ({{ counts.rejected }})
+    </a>
+  </li>
+</ul>
+
+{% if reports %}
+<div class="table-responsive">
+  <table class="table table-hover bg-white shadow-sm">
+    <thead>
+      <tr><th>Number or link</th><th>Type</th><th>Reporter</th><th>Submitted</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for report in reports %}
+      <tr>
+        <td>{{ report.indicator_value }}</td>
+        <td>{{ report.get_scam_type_display }}</td>
+        <td>{{ report.reporter.username }}</td>
+        <td>{{ report.created_at|date:"j M Y, H:i" }}</td>
+        <td><a href="{% url 'review_report' report.pk %}">Review</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+  <div class="alert alert-info">Nothing here.</div>
+{% endif %}
+{% endblock %}

@@ -24,6 +24,9 @@
         {% if user.is_authenticated %}
           <a class="btn btn-danger btn-sm" href="{% url 'submit_report' %}">Report a scam</a>
           <a class="btn btn-outline-light btn-sm" href="{% url 'my_reports' %}">My reports</a>
+                    {% if perms.reports.review_reports %}
+                      <a class="btn btn-info btn-sm" href="{% url 'moderation_queue' %}">Moderation</a>
+                    {% endif %}
           <span class="text-light small">Hi, {{ user.username }}</span>
           <form method="post" action="{% url 'logout' %}" class="d-inline">
             {% csrf_token %}

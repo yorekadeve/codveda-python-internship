@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="{% url 'moderation_queue' %}" class="small">&larr; Back to the queue</a>
+
+<div class="row g-4 mt-1">
+  <div class="col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <h2 class="h4 mb-0">{{ report.indicator_value }}</h2>
+          {% if report.status == "verified" %}
+            <span class="badge bg-success">Verified</span>
+          {% elif report.status == "rejected" %}
+            <span class="badge bg-secondary">Rejected</span>
+          {% else %}
+            <span class="badge bg-warning text-dark">Pending</span>
+          {% endif %}
+        </div>
+
+        <dl class="row mb-0">
+          <dt class="col-sm-4">Scam type</dt>
+          <dd class="col-sm-8">{{ report.get_scam_type_display }}</dd>
+          <dt class="col-sm-4">Reported as</dt>
+          <dd class="col-sm-8">{{ report.get_indicator_type_display }}</dd>
+          <dt class="col-sm-4">Checked as</dt>
+          <dd class="col-sm-8">{{ report.normalized_value }}</dd>
+          <dt class="col-sm-4">Date it happened</dt>
+          <dd class="col-sm-8">{{ report.date_occurred }}</dd>
+          <dt class="col-sm-4">Amount lost (UGX)</dt>
+          <dd class="col-sm-8">{{ report.amount_lost|default:"Not given" }}</dd>
+          <dt class="col-sm-4">What happened</dt>
+          <dd class="col-sm-8">{{ report.description|linebreaksbr }}</dd>
+          {% if report.message_text %}
+            <dt class="col-sm-4">Scam message</dt>
+            <dd class="col-sm-8">{{ report.message_text|linebreaksbr }}</dd>
+          {% endif %}
+          <dt class="col-sm-4">Reporter</dt>
+          <dd class="col-sm-8">{{ report.reporter.username }}</dd>
+          <dt class="col-sm-4">Submitted</dt>
+          <dd class="col-sm-8">{{ report.created_at }}</dd>
+          {% if report.reviewed_by %}
+            <dt class="col-sm-4">Last review</dt>
+            <dd class="col-sm-8">{{ report.reviewed_by.username }}, {{ report.reviewed_at }}</dd>
+          {% endif %}
+          {% if report.status == "rejected" %}
+            <dt class="col-sm-4">Rejection reason</dt>
+            <dd class="col-sm-8">{{ report.rejection_reason }}</dd>
+          {% endif %}
+        </dl>
+
+        {% if report.evidence %}
+          <hr>
+          <h3 class="h6">Screenshot</h3>
+          <img src="{% url 'evidence_file' report.pk %}" class="img-fluid border rounded" alt="Screenshot from the reporter">
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body p-4">
+        <h3 class="h6">Decision</h3>
+        {% if report.reporter_id == user.id %}
+          <div class="alert alert-secondary mb-0">
+            You submitted this report, so another moderator must review it.
+          </div>
+        {% else %}
+          <form method="post" class="mb-3">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="verify">
+            <button class="btn btn-success w-100">Verify as a real scam</button>
+          </form>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="reject">
+            <label class="form-label" for="reason">Reason for rejecting</label>
+            <textarea id="reason" name="rejection_reason" rows="3" maxlength="500"></textarea>
+            <button class="btn btn-outline-danger w-100 mt-2">Reject report</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h3 class="h6">Other reports of the same number or link</h3>
+        {% if related %}
+          <ul class="list-unstyled mb-0">
+            {% for other in related %}
+              <li class="mb-1">
+                <a href="{% url 'review_report' other.pk %}">Report #{{ other.pk }}</a>
+                <span class="badge bg-light text-dark border">{{ other.get_status_display }}</span>
+                <span class="small text-muted">{{ other.created_at|date:"j M Y" }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="small text-muted mb-0">No other reports.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

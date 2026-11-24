@@ -59,6 +59,7 @@ class ScamReport(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        permissions = [("review_reports", "Can review scam reports")]
 
     def save(self, *args, **kwargs):
         self.normalized_value = normalize_indicator(
