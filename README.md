@@ -20,7 +20,8 @@ codveda-python-internship/
 │   ├── data_scraper.py          Task 2: Data Scraper
 │   └── api_integration.py       Task 3: Password Breach Checker (API integration)
 ├── Level_3_Advanced/            Level 3 (Advanced)
-│   └── (Django project)         Task 1: ScamShield UG, Django web application
+│   ├── (Django project)         Task 1: ScamShield UG, Django web application
+│   └── file_encryption/         Task 2: File Encryption and Decryption application
 └── README.md
 ```
 
@@ -206,6 +207,39 @@ This number or link has been reported and verified 2 times. Do not send money or
 Checked as: +256772123456
 ```
 
+### Task 2: Basic File Encryption/Decryption (`Level_3_Advanced/file_encryption/file_encryption.py`)
+
+**What it does:** encrypts a text file with a password and saves it as a new file ending in `.enc`, then decrypts it back to the original text in another new file. The original file is never overwritten.
+
+**How I built it:**
+- I used Fernet from the `cryptography` library instead of a Caesar cipher, because Fernet is real encryption: AES with an authentication code, so a wrong password or a modified file is detected and refused.
+- The key is never typed directly. The password is turned into a 256-bit key with PBKDF2-HMAC-SHA256 (600,000 rounds) and a random 16-byte salt, so the same password gives a different key for every file and guessing passwords is slow.
+- The encrypted file stores a short header and the salt, followed by the encrypted data, so decrypting needs only the file and the password.
+- The user chooses to encrypt or decrypt and enters the file path. The password is typed with hidden input, and when encrypting it must be at least 8 characters and typed twice.
+- Errors are handled with clear messages: file not found, wrong password or changed file, a file not encrypted by this program, and an output file that already exists.
+- 8 unit tests check the round trip, wrong passwords, tampering, and that the encrypted file never contains the plain text.
+
+**How to run it:**
+```
+pip install cryptography
+python Level_3_Advanced/file_encryption/file_encryption.py
+```
+To run the tests:
+```
+python -m unittest discover -s Level_3_Advanced/file_encryption -v
+```
+
+**Example:**
+```
+=== File Encryption and Decryption ===
+1. Encrypt a file
+2. Decrypt a file
+Choose 1 or 2: 1
+Enter the path of the file: Level_3_Advanced/file_encryption/sample_secret.txt
+Choose a password (typing is hidden):
+Type the password again:
+Encrypted. Saved as: Level_3_Advanced\file_encryption\sample_secret.txt.enc
+```
 ### What I learned in Level 3
 
 - Building a complete Django application with models, views, forms, templates and URLs
@@ -213,7 +247,9 @@ Checked as: +256772123456
 - Defending against common web attacks: IDOR, CSRF, XSS, SQL injection, brute-force login, unsafe file upload, and scraping
 - Keeping secrets out of code, and applying least privilege to the database
 - Writing automated tests that prove security rules keep working
-
-## Requirements
-- Level 3 needs MySQL 8 and the packages in `Level_3_Advanced/requirements.txt` (setup steps are in `Level_3_Advanced/README.md`).
+- Encrypting and decrypting files with Fernet, and why real encryption beats a Caesar cipher
+- Deriving encryption keys from passwords with a salt and PBKDF2
+- Authenticated encryption: detecting wrong passwords and tampered files
 ---
+### Requirements
+- Level 3, Task 2 needs `cryptography`: `pip install cryptography`

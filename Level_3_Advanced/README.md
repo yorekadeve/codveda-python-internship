@@ -105,6 +105,7 @@ Level_3_Advanced/
 ├── accounts/        Registration, login with lockout, password reset
 ├── reports/         Reports, checker, confirmations, moderation, statistics
 ├── audit/           Audit log, signals and the rate limiter
+├── file_encryption/ Separate task: file encryption tool (not part of the web app)
 ├── templates/       Shared layout and pages
 ├── requirements.txt
 └── .env.example
